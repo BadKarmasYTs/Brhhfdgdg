@@ -1,0 +1,176 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  font-family: system-ui, sans-serif;
+  background: #f5f5f5;
+  color: #111;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  height: 100%;
+  overflow: hidden;
+}
+
+body.dark-mode {
+  background: #1a1a1a;
+  color: #fff;
+}
+
+.container {
+  width: 100%;
+  max-width: 700px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  gap: 10px;
+  overflow: hidden;
+}
+
+.header {
+  text-align: center;
+  padding-bottom: 10px;
+}
+
+#confessionCounter {
+  margin-top: 5px;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.user-input {
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  background: white;
+  padding: 20px;
+  z-index: 10;
+  border-radius: 10px;
+}
+
+body.dark-mode .user-input {
+  background: #2a2a2a;
+}
+
+.user-input input,
+.user-input select,
+.user-input textarea {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 10px;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background: white;
+  color: black;
+}
+
+body.dark-mode input,
+body.dark-mode select,
+body.dark-mode textarea {
+  background-color: #333;
+  color: white;
+  border-color: #444;
+}
+
+body.dark-mode input::placeholder,
+body.dark-mode textarea::placeholder {
+  color: #aaa;
+}
+
+.user-input button {
+  width: 100%;
+  padding: 12px;
+  font-size: 1rem;
+  background-color: #4f46e5;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.user-input button:hover {
+  background-color: #4338ca;
+}
+
+.emoji-picker {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+
+.emoji {
+  font-size: 22px;
+  cursor: pointer;
+}
+
+#confessionsList {
+  flex-grow: 1;
+  overflow-y: auto;
+  padding-right: 5px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding-bottom: 30px;
+}
+
+.confession {
+  background: #f0f0f0;
+  padding: 20px;
+  border-radius: 10px;
+  animation: fadeInUp 0.4s ease;
+}
+
+body.dark-mode .confession {
+  background-color: #2a2a2a;
+}
+
+.confession p {
+  margin-bottom: 10px;
+  line-height: 1.5;
+  word-wrap: break-word;
+}
+
+.category {
+  font-style: italic;
+  color: #888;
+  font-size: 0.9rem;
+}
+
+.time {
+  font-size: 0.8rem;
+  color: #aaa;
+}
+
+.reaction-container {
+  display: flex;
+  gap: 16px;
+  font-size: 1.1rem;
+}
+
+.upvote,
+.downvote {
+  cursor: pointer;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
