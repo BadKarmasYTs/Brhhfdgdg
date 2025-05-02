@@ -1,97 +1,76 @@
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-html, body {
-  height: 100%;
-  overflow: hidden;
-}
-
 body {
-  font-family: system-ui, sans-serif;
-  background: #f5f5f5;
+  margin: 0;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f9f9f9;
   color: #111;
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  height: 100%;
-  overflow: hidden;
+  transition: background-color 0.3s, color 0.3s;
 }
 
-body.dark-mode {
-  background: #1a1a1a;
-  color: #fff;
+.dark {
+  background-color: #121212;
+  color: #f0f0f0;
 }
 
-.container {
-  width: 100%;
-  max-width: 700px;
-  height: 100%;
+.page {
   display: flex;
   flex-direction: column;
+  gap: 20px;
   padding: 20px;
-  gap: 10px;
-  overflow: hidden;
 }
 
 .header {
-  text-align: center;
-  padding-bottom: 10px;
-}
-
-#confessionCounter {
-  margin-top: 5px;
-  font-size: 0.9rem;
-  color: #666;
-}
-
-.user-input {
-  flex-shrink: 0;
-  position: sticky;
-  top: 0;
-  background: white;
-  padding: 20px;
-  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: #fff;
+  padding: 15px;
   border-radius: 10px;
 }
 
-body.dark-mode .user-input {
-  background: #2a2a2a;
+.dark .header {
+  background: #1f1f1f;
 }
 
-.user-input input,
-.user-input select,
-.user-input textarea {
-  width: 100%;
-  padding: 12px;
-  margin-bottom: 10px;
+.top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+#darkModeToggle {
+  padding: 5px 10px;
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+input, select, textarea {
+  padding: 10px;
   font-size: 1rem;
+  width: 100%;
+  max-width: 100%;
   border: 1px solid #ccc;
   border-radius: 8px;
-  background: white;
-  color: black;
+  background: #fff;
+  color: #000;
+  box-sizing: border-box;
 }
 
-body.dark-mode input,
-body.dark-mode select,
-body.dark-mode textarea {
-  background-color: #333;
-  color: white;
-  border-color: #444;
+.dark input, .dark textarea, .dark select {
+  background: #2c2c2c;
+  color: #f0f0f0;
+  border: 1px solid #555;
 }
 
-body.dark-mode input::placeholder,
-body.dark-mode textarea::placeholder {
-  color: #aaa;
+textarea {
+  min-height: 150px;
 }
 
-.user-input button {
-  width: 100%;
-  padding: 12px;
+#submitBtn {
+  padding: 10px;
   font-size: 1rem;
-  background-color: #4f46e5;
+  background: #007bff;
   color: white;
   border: none;
   border-radius: 8px;
@@ -99,78 +78,85 @@ body.dark-mode textarea::placeholder {
   transition: background 0.2s;
 }
 
-.user-input button:hover {
-  background-color: #4338ca;
+#submitBtn:hover {
+  background: #0056b3;
 }
 
-.emoji-picker {
+.emoji-bar {
   display: flex;
   gap: 10px;
-  margin-bottom: 10px;
-  flex-wrap: wrap;
+  font-size: 24px;
+  justify-content: center;
 }
 
 .emoji {
-  font-size: 22px;
+  cursor: pointer;
+  transition: transform 0.1s;
+}
+
+.emoji:hover {
+  transform: scale(1.2);
+}
+
+.filters {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 10px;
+}
+
+.filterBtn {
+  padding: 10px 20px;
+  background-color: #ddd;
+  border: none;
+  border-radius: 8px;
   cursor: pointer;
 }
 
-#confessionsList {
-  flex-grow: 1;
-  overflow-y: auto;
-  padding-right: 5px;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  padding-bottom: 30px;
+.filterBtn:hover {
+  background-color: #bbb;
 }
 
 .confession {
-  background: #f0f0f0;
-  padding: 20px;
+  background: #fff;
   border-radius: 10px;
-  animation: fadeInUp 0.4s ease;
+  padding: 15px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+  max-width: 100%;
 }
 
-body.dark-mode .confession {
-  background-color: #2a2a2a;
+.dark .confession {
+  background: #1f1f1f;
+  box-shadow: none;
+  border: 1px solid #333;
 }
 
-.confession p {
-  margin-bottom: 10px;
-  line-height: 1.5;
-  word-wrap: break-word;
-}
-
-.category {
-  font-style: italic;
-  color: #888;
-  font-size: 0.9rem;
-}
-
-.time {
-  font-size: 0.8rem;
-  color: #aaa;
-}
-
-.reaction-container {
+#confessionsList {
   display: flex;
-  gap: 16px;
-  font-size: 1.1rem;
+  flex-direction: column;
+  gap: 15px;
 }
 
-.upvote,
-.downvote {
-  cursor: pointer;
+.footer {
+  text-align: center;
+  margin-top: 20px;
 }
 
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
+@media (max-width: 600px) {
+  .header, #confessionsList, .filters {
+    padding: 10px;
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+
+  .emoji-bar {
+    font-size: 20px;
+    flex-wrap: wrap;
+  }
+
+  .filterBtn {
+    padding: 8px 16px;
+  }
+
+  #submitBtn {
+    width: 100%;
   }
 }
