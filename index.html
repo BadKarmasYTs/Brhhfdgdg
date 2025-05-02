@@ -1,35 +1,51 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Anonymous Confession Wall</title>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="header">
-    <h1>🧠 Anonymous Confession Wall</h1>
-    <input type="text" id="nickname" placeholder="Your nickname..." />
-    <select id="category">
-      <option value="General">General</option>
-      <option value="Funny">Funny</option>
-      <option value="Sad">Sad</option>
-      <option value="Weird">Weird</option>
-    </select>
-    <textarea id="confessionInput" placeholder="Type your confession..."></textarea>
-    <div class="emoji-bar">
-      <span class="emoji">😂</span>
-      <span class="emoji">😭</span>
-      <span class="emoji">😳</span>
-      <span class="emoji">😡</span>
-      <span class="emoji">❤️</span>
+  <div class="page">
+    <div class="header">
+      <div class="top-bar">
+        <h1>Confession Wall</h1>
+        <button id="darkModeToggle">🌓</button>
+      </div>
+      <input type="text" id="nickname" placeholder="Your nickname...">
+      <select id="category">
+        <option value="General">General</option>
+        <option value="Funny">Funny</option>
+        <option value="Sad">Sad</option>
+        <option value="Weird">Weird</option>
+      </select>
+      <textarea id="confessionInput" placeholder="Type your confession..."></textarea>
+      <div class="emoji-bar">
+        <span class="emoji">😂</span>
+        <span class="emoji">😭</span>
+        <span class="emoji">😳</span>
+        <span class="emoji">😡</span>
+        <span class="emoji">❤️</span>
+      </div>
+      <button id="submitBtn">Post Confession</button>
+      <div id="confessionCounter"></div>
     </div>
-    <button id="submitBtn">Post Confession</button>
-    <div id="confessionCounter"></div>
+
+    <div id="confessionsList"></div>
   </div>
 
-  <div id="confessionsList"></div>
-
+  <script>
+    const darkToggle = document.getElementById("darkModeToggle")
+    const body = document.body
+    if (localStorage.getItem("darkMode") === "true") {
+      body.classList.add("dark")
+    }
+    darkToggle.onclick = () => {
+      body.classList.toggle("dark")
+      localStorage.setItem("darkMode", body.classList.contains("dark"))
+    }
+  </script>
   <script type="module" src="script.js"></script>
 </body>
 </html>
