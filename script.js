@@ -1,38 +1,53 @@
-let confessions = [];
-let likedPosts = new Set();
-let dislikedPosts = new Set();
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getDatabase, ref, push, onValue, update } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCuwF7_iRb0CIqApyk3_bBFPCoUHVTbn1Q",
+  authDomain: "website-e08f0.firebaseapp.com",
+  databaseURL: "https://website-e08f0-default-rtdb.firebaseio.com",
+  projectId: "website-e08f0",
+  storageBucket: "website-e08f0.firebasestorage.app",
+  messagingSenderId: "738977165779",
+  appId: "1:738977165779:web:8b54334e8306aa5932bf26",
+  measurementId: "G-5DC7NWVJGD"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+const confessionsRef = ref(db, "confessions");
+const likedPosts = new Set();
+const dislikedPosts = new Set();
+
+document.getElementById("submitBtn").onclick = submitConfession;
 
 function submitConfession() {
   const input = document.getElementById("confessionInput");
-  const list = document.getElementById("confessionsList");
   const nickname = document.getElementById("nickname").value.trim() || "Anonymous";
   const category = document.getElementById("category").value;
-
   const text = input.value.trim();
   if (!text) return;
 
-  const id = Date.now();
   const newConfession = {
-    id,
     text,
     nickname,
     category,
-    timestamp: new Date(),
+    timestamp: Date.now(),
     likes: 0,
     dislikes: 0
   };
 
-  confessions.unshift(newConfession);
-  updateConfessions();
+  push(confessionsRef, newConfession);
   input.value = "";
-  document.getElementById("confessionCounter").innerText = `Total Confessions: ${confessions.length}`;
 }
 
-function updateConfessions() {
+onValue(confessionsRef, (snapshot) => {
+  const data = snapshot.val();
   const list = document.getElementById("confessionsList");
   list.innerHTML = "";
+  const entries = data ? Object.entries(data).reverse() : [];
 
-  confessions.forEach(conf => {
+  entries.forEach(([id, conf]) => {
     const el = document.createElement("div");
     el.className = "confession";
 
@@ -42,35 +57,35 @@ function updateConfessions() {
       <p><strong>${conf.nickname}</strong> • <span class="category">${conf.category}</span> • <span class="time">${timeAgo}</span></p>
       <p>${conf.text}</p>
       <div class="reaction-container">
-        <span class="upvote" onclick="likeConfession(${conf.id})">👍 ${conf.likes}</span>
-        <span class="downvote" onclick="dislikeConfession(${conf.id})">👎 ${conf.dislikes}</span>
+        <span class="upvote" data-id="${id}" onclick="likeConfession('${id}')">👍 ${conf.likes || 0}</span>
+        <span class="downvote" data-id="${id}" onclick="dislikeConfession('${id}')">👎 ${conf.dislikes || 0}</span>
       </div>
     `;
     list.appendChild(el);
   });
-}
 
-function likeConfession(id) {
+  document.getElementById("confessionCounter").innerText = `Total Confessions: ${entries.length}`;
+});
+
+window.likeConfession = function(id) {
   if (likedPosts.has(id)) return;
   likedPosts.add(id);
   dislikedPosts.delete(id);
-  const conf = confessions.find(c => c.id === id);
-  if (conf) conf.likes++;
-  updateConfessions();
-}
+  const postRef = ref(db, `confessions/${id}`);
+  update(postRef, {
+    likes: (parseInt(document.querySelector(`[data-id="${id}"]`).textContent.split(" ")[1]) || 0) + 1
+  });
+};
 
-function dislikeConfession(id) {
+window.dislikeConfession = function(id) {
   if (dislikedPosts.has(id)) return;
   dislikedPosts.add(id);
   likedPosts.delete(id);
-  const conf = confessions.find(c => c.id === id);
-  if (conf) conf.dislikes++;
-  updateConfessions();
-}
-
-function toggleDarkMode() {
-  document.body.classList.toggle("dark-mode");
-}
+  const postRef = ref(db, `confessions/${id}`);
+  update(postRef, {
+    dislikes: (parseInt(document.querySelector(`.downvote[data-id="${id}"]`).textContent.split(" ")[1]) || 0) + 1
+  });
+};
 
 function timeSince(date) {
   const seconds = Math.floor((new Date() - date) / 1000);
