@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getDatabase, ref, push, onValue, update, remove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+import { getDatabase, ref, push, onValue, update } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCuwF7_iRb0CIqApyk3_bBFPCoUHVTbn1Q",
@@ -18,7 +18,6 @@ const db = getDatabase(app);
 const confessionsRef = ref(db, "confessions");
 const likedPosts = new Set();
 const dislikedPosts = new Set();
-const confessionsData = [];
 
 document.getElementById("submitBtn").onclick = submitConfession;
 
@@ -27,7 +26,11 @@ function submitConfession() {
   const nickname = document.getElementById("nickname").value.trim() || "Anonymous";
   const category = document.getElementById("category").value;
   const text = input.value.trim();
-  if (!text) return;
+
+  if (!text) {
+    alert("Please enter a confession!");
+    return;
+  }
 
   const newConfession = {
     text,
@@ -39,8 +42,13 @@ function submitConfession() {
     comments: []
   };
 
-  push(confessionsRef, newConfession);
-  input.value = "";
+  push(confessionsRef, newConfession).then(() => {
+    input.value = ""; // Clear input
+    alert("Confession submitted successfully!");
+  }).catch((error) => {
+    console.error("Error submitting confession:", error);
+    alert("Failed to submit confession. Please try again.");
+  });
 }
 
 onValue(confessionsRef, (snapshot) => {
@@ -76,6 +84,26 @@ onValue(confessionsRef, (snapshot) => {
   document.getElementById("confessionCounter").innerText = `Total Confessions: ${entries.length}`;
 });
 
+window.likeConfession = function(id) {
+  if (likedPosts.has(id)) return;
+  likedPosts.add(id);
+  dislikedPosts.delete(id);
+  const postRef = ref(db, `confessions/${id}`);
+  update(postRef, {
+    likes: (parseInt(document.querySelector(`[data-id="${id}"]`).textContent.split(" ")[1]) || 0) + 1
+  });
+};
+
+window.dislikeConfession = function(id) {
+  if (dislikedPosts.has(id)) return;
+  dislikedPosts.add(id);
+  likedPosts.delete(id);
+  const postRef = ref(db, `confessions/${id}`);
+  update(postRef, {
+    dislikes: (parseInt(document.querySelector(`.downvote[data-id="${id}"]`).textContent.split(" ")[1]) || 0) + 1
+  });
+};
+
 function timeSince(date) {
   const seconds = Math.floor((new Date() - date) / 1000);
   const intervals = [
@@ -93,70 +121,27 @@ function timeSince(date) {
   return "Just now";
 }
 
-function likeConfession(id) {
-  if (likedPosts.has(id)) return;
-  likedPosts.add(id);
-  dislikedPosts.delete(id);
-  const postRef = ref(db, `confessions/${id}`);
-  update(postRef, {
-    likes: (parseInt(document.querySelector(`[data-id="${id}"]`).textContent.split(" ")[1]) || 0) + 1
-  });
-}
-
-function dislikeConfession(id) {
-  if (dislikedPosts.has(id)) return;
-  dislikedPosts.add(id);
-  likedPosts.delete(id);
-  const postRef = ref(db, `confessions/${id}`);
-  update(postRef, {
-    dislikes: (parseInt(document.querySelector(`.downvote[data-id="${id}"]`).textContent.split(" ")[1]) || 0) + 1
-  });
-}
-
-function toggleComments(id) {
+window.toggleComments = function(id) {
   const commentsSection = document.getElementById(`comments-${id}`);
   commentsSection.style.display = commentsSection.style.display === "none" ? "block" : "none";
-}
+};
 
-function postComment(id) {
-  const input = document.getElementById(`commentInput-${id}`);
-  const nickname = document.getElementById("nickname").value.trim() || "Anonymous";
-  const text = input.value.trim();
+window.postComment = function(id) {
+  const commentInput = document.getElementById(`commentInput-${id}`);
+  const text = commentInput.value.trim();
   if (!text) return;
 
+  const newComment = {
+    text,
+    nickname: "Anonymous", // You can modify this to use the nickname input if desired
+  };
+
   const postRef = ref(db, `confessions/${id}/comments`);
-  push(postRef, { nickname, text });
-  input.value = "";
-}
+  push(postRef, newComment);
+  commentInput.value = ""; // Clear comment input
+};
 
-function deleteConfession(id) {
-  const confirmation = confirm("Are you sure you want to delete this confession?");
-  if (confirmation) {
-    const postRef = ref(db, `confessions/${id}`);
-    remove(postRef);
-  }
-}
-
-function filterConfessions(filter) {
-  const list = document.getElementById("confessionsList");
-  let sortedConfessions;
-
-  if (filter === 'newest') {
-    sortedConfessions = confessionsData.sort((a, b) => b.timestamp - a.timestamp);
-  } else if (filter === 'oldest') {
-    sortedConfessions = confessionsData.sort((a, b) => a.timestamp - b.timestamp);
-  } else if (filter === 'mostLiked') {
-    sortedConfessions = confessionsData.sort((a, b) => b.likes - a.likes);
-  }
-
-  list.innerHTML = "";
-  sortedConfessions.forEach(conf => {
-    const el = document.createElement("div");
-    el.className = "confession";
-    el.innerHTML = `
-      <p><strong>${conf.nickname}</strong> • <span class="category">${conf.category}</span> • <span class="time">${timeSince(new Date(conf.timestamp))}</span></p>
-      <p>${conf.text}</p>
-    `;
-    list.appendChild(el);
-  });
-}
+window.deleteConfession = function(id) {
+  const postRef = ref(db, `confessions/${id}`);
+  update(postRef, null); // Delete the confession
+};
