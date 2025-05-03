@@ -26,11 +26,7 @@ function submitConfession() {
   const nickname = document.getElementById("nickname").value.trim() || "Anonymous";
   const category = document.getElementById("category").value;
   const text = input.value.trim();
-
-  if (!text) {
-    alert("Please enter a confession!");
-    return;
-  }
+  if (!text) return;
 
   const newConfession = {
     text,
@@ -38,17 +34,11 @@ function submitConfession() {
     category,
     timestamp: Date.now(),
     likes: 0,
-    dislikes: 0,
-    comments: []
+    dislikes: 0
   };
 
-  push(confessionsRef, newConfession).then(() => {
-    input.value = ""; // Clear input
-    alert("Confession submitted successfully!");
-  }).catch((error) => {
-    console.error("Error submitting confession:", error);
-    alert("Failed to submit confession. Please try again.");
-  });
+  push(confessionsRef, newConfession);
+  input.value = "";
 }
 
 onValue(confessionsRef, (snapshot) => {
@@ -63,34 +53,27 @@ onValue(confessionsRef, (snapshot) => {
 
     const timeAgo = timeSince(new Date(conf.timestamp));
 
-    el.innerHTML = `
+    el.innerHTML = 
       <p><strong>${conf.nickname}</strong> • <span class="category">${conf.category}</span> • <span class="time">${timeAgo}</span></p>
       <p>${conf.text}</p>
       <div class="reaction-container">
         <span class="upvote" data-id="${id}" onclick="likeConfession('${id}')">👍 ${conf.likes || 0}</span>
         <span class="downvote" data-id="${id}" onclick="dislikeConfession('${id}')">👎 ${conf.dislikes || 0}</span>
-        <span class="comment" data-id="${id}" onclick="toggleComments('${id}')">💬 Comments</span>
-        <span class="delete" data-id="${id}" onclick="deleteConfession('${id}')">🗑️</span>
       </div>
-      <div id="comments-${id}" class="comments" style="display:none">
-        ${conf.comments.map(c => `<p><strong>${c.nickname}</strong>: ${c.text}</p>`).join('')}
-        <textarea id="commentInput-${id}" placeholder="Add a comment..."></textarea>
-        <button onclick="postComment('${id}')">Post Comment</button>
-      </div>
-    `;
+    ;
     list.appendChild(el);
   });
 
-  document.getElementById("confessionCounter").innerText = `Total Confessions: ${entries.length}`;
+  document.getElementById("confessionCounter").innerText = Total Confessions: ${entries.length};
 });
 
 window.likeConfession = function(id) {
   if (likedPosts.has(id)) return;
   likedPosts.add(id);
   dislikedPosts.delete(id);
-  const postRef = ref(db, `confessions/${id}`);
+  const postRef = ref(db, confessions/${id});
   update(postRef, {
-    likes: (parseInt(document.querySelector(`[data-id="${id}"]`).textContent.split(" ")[1]) || 0) + 1
+    likes: (parseInt(document.querySelector([data-id="${id}"]).textContent.split(" ")[1]) || 0) + 1
   });
 };
 
@@ -98,9 +81,9 @@ window.dislikeConfession = function(id) {
   if (dislikedPosts.has(id)) return;
   dislikedPosts.add(id);
   likedPosts.delete(id);
-  const postRef = ref(db, `confessions/${id}`);
+  const postRef = ref(db, confessions/${id});
   update(postRef, {
-    dislikes: (parseInt(document.querySelector(`.downvote[data-id="${id}"]`).textContent.split(" ")[1]) || 0) + 1
+    dislikes: (parseInt(document.querySelector(.downvote[data-id="${id}"]).textContent.split(" ")[1]) || 0) + 1
   });
 };
 
@@ -116,32 +99,15 @@ function timeSince(date) {
   ];
   for (const i of intervals) {
     const count = Math.floor(seconds / i.secs);
-    if (count >= 1) return `${count} ${i.label}${count > 1 ? "s" : ""} ago`;
+    if (count >= 1) return ${count} ${i.label}${count > 1 ? "s" : ""} ago;
   }
   return "Just now";
 }
 
-window.toggleComments = function(id) {
-  const commentsSection = document.getElementById(`comments-${id}`);
-  commentsSection.style.display = commentsSection.style.display === "none" ? "block" : "none";
-};
-
-window.postComment = function(id) {
-  const commentInput = document.getElementById(`commentInput-${id}`);
-  const text = commentInput.value.trim();
-  if (!text) return;
-
-  const newComment = {
-    text,
-    nickname: "Anonymous", // You can modify this to use the nickname input if desired
+document.querySelectorAll(".emoji").forEach(e => {
+  e.onclick = () => {
+    const input = document.getElementById("confessionInput");
+    input.value += e.innerText;
+    input.focus();
   };
-
-  const postRef = ref(db, `confessions/${id}/comments`);
-  push(postRef, newComment);
-  commentInput.value = ""; // Clear comment input
-};
-
-window.deleteConfession = function(id) {
-  const postRef = ref(db, `confessions/${id}`);
-  update(postRef, null); // Delete the confession
-};
+});
