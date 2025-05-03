@@ -1,6 +1,7 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getDatabase, ref, push, onValue, update } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+import { initializeApp } from "firebase/app";
+import { getDatabase, ref, set, onValue } from "firebase/database";
 
+// Firebase setup
 const firebaseConfig = {
   apiKey: "AIzaSyCuwF7_iRb0CIqApyk3_bBFPCoUHVTbn1Q",
   authDomain: "website-e08f0.firebaseapp.com",
@@ -15,99 +16,85 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-const confessionsRef = ref(db, "confessions");
-const likedPosts = new Set();
-const dislikedPosts = new Set();
+const confessionsList = document.getElementById("confessionsList");
+const confessionInput = document.getElementById("confessionInput");
+const nicknameInput = document.getElementById("nickname");
+const categorySelect = document.getElementById("category");
+const submitBtn = document.getElementById("submitBtn");
 
-document.getElementById("submitBtn").onclick = submitConfession;
-
-function submitConfession() {
-  const input = document.getElementById("confessionInput");
-  const nickname = document.getElementById("nickname").value.trim() || "Anonymous";
-  const category = document.getElementById("category").value;
-  const text = input.value.trim();
-  if (!text) return;
-
-  const newConfession = {
-    text,
-    nickname,
-    category,
-    timestamp: Date.now(),
-    likes: 0,
-    dislikes: 0
-  };
-
-  push(confessionsRef, newConfession);
-  input.value = "";
+// Dark Mode Toggle
+const darkToggle = document.getElementById("darkModeToggle");
+const body = document.body;
+if (localStorage.getItem("darkMode") === "true") {
+  body.classList.add("dark");
 }
 
-onValue(confessionsRef, (snapshot) => {
-  const data = snapshot.val();
-  const list = document.getElementById("confessionsList");
-  list.innerHTML = "";
-  const entries = data ? Object.entries(data).reverse() : [];
-
-  entries.forEach(([id, conf]) => {
-    const el = document.createElement("div");
-    el.className = "confession";
-
-    const timeAgo = timeSince(new Date(conf.timestamp));
-
-    el.innerHTML = 
-      <p><strong>${conf.nickname}</strong> • <span class="category">${conf.category}</span> • <span class="time">${timeAgo}</span></p>
-      <p>${conf.text}</p>
-      <div class="reaction-container">
-        <span class="upvote" data-id="${id}" onclick="likeConfession('${id}')">👍 ${conf.likes || 0}</span>
-        <span class="downvote" data-id="${id}" onclick="dislikeConfession('${id}')">👎 ${conf.dislikes || 0}</span>
-      </div>
-    ;
-    list.appendChild(el);
-  });
-
-  document.getElementById("confessionCounter").innerText = Total Confessions: ${entries.length};
+darkToggle.addEventListener("click", () => {
+  body.classList.toggle("dark");
+  localStorage.setItem("darkMode", body.classList.contains("dark"));
 });
 
-window.likeConfession = function(id) {
-  if (likedPosts.has(id)) return;
-  likedPosts.add(id);
-  dislikedPosts.delete(id);
-  const postRef = ref(db, confessions/${id});
-  update(postRef, {
-    likes: (parseInt(document.querySelector([data-id="${id}"]).textContent.split(" ")[1]) || 0) + 1
-  });
-};
+// Add confession to Firebase
+submitBtn.addEventListener("click", function () {
+  const nickname = nicknameInput.value.trim();
+  const confessionText = confessionInput.value.trim();
+  const category = categorySelect.value;
 
-window.dislikeConfession = function(id) {
-  if (dislikedPosts.has(id)) return;
-  dislikedPosts.add(id);
-  likedPosts.delete(id);
-  const postRef = ref(db, confessions/${id});
-  update(postRef, {
-    dislikes: (parseInt(document.querySelector(.downvote[data-id="${id}"]).textContent.split(" ")[1]) || 0) + 1
-  });
-};
+  // Simple logging to check if the function is triggered
+  console.log("Button clicked!");
+  console.log("Nickname:", nickname, "Confession:", confessionText, "Category:", category);
 
-function timeSince(date) {
-  const seconds = Math.floor((new Date() - date) / 1000);
-  const intervals = [
-    { label: "year", secs: 31536000 },
-    { label: "month", secs: 2592000 },
-    { label: "day", secs: 86400 },
-    { label: "hour", secs: 3600 },
-    { label: "minute", secs: 60 },
-    { label: "second", secs: 1 },
-  ];
-  for (const i of intervals) {
-    const count = Math.floor(seconds / i.secs);
-    if (count >= 1) return ${count} ${i.label}${count > 1 ? "s" : ""} ago;
+  if (nickname && confessionText) {
+    const confessionRef = ref(db, 'confessions/' + Date.now());
+    set(confessionRef, {
+      nickname: nickname,
+      text: confessionText,
+      category: category,
+      timestamp: Date.now()
+    }).then(() => {
+      // Reset the form inputs after submission
+      confessionInput.value = "";
+      nicknameInput.value = "";
+    }).catch((error) => {
+      console.error("Error posting confession:", error);
+    });
+  } else {
+    alert("Please enter a nickname and confession!");
   }
-  return "Just now";
-}
+});
 
-document.querySelectorAll(".emoji").forEach(e => {
-  e.onclick = () => {
-    const input = document.getElementById("confessionInput");
-    input.value += e.innerText;
-    input.focus();
-  };
+// Real-time confessions update
+onValue(ref(db, 'confessions'), (snapshot) => {
+  confessionsList.innerHTML = "";
+  snapshot.forEach((childSnapshot) => {
+    const confession = childSnapshot.val();
+    const confessionElement = document.createElement("div");
+    confessionElement.classList.add("confession");
+    confessionElement.dataset.category = confession.category;
+
+    confessionElement.innerHTML = `
+      <h3>${confession.nickname}</h3>
+      <p>${confession.text}</p>
+      <p class="timestamp">${new Date(confession.timestamp).toLocaleString()}</p>
+    `;
+    confessionsList.appendChild(confessionElement);
+  });
+});
+
+// Emoji input handling
+const emojis = document.querySelectorAll('.emoji');
+emojis.forEach(emoji => {
+  emoji.onclick = () => confessionInput.value += emoji.textContent;
+});
+
+// Category filter
+const filterButtons = document.querySelectorAll('.filterBtn');
+filterButtons.forEach(btn => {
+  btn.addEventListener("click", () => {
+    const category = btn.dataset.filter;
+    const confs = document.querySelectorAll('.confession');
+    confs.forEach(c => {
+      c.style.display = (category === 'all' || c.dataset.category === category) ? 'block' : 'none';
+    });
+  });
 });
