@@ -2,39 +2,34 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Anonymous Confession Wall</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="container">
-    <div class="header">
-      <h1>Anonymous Confession Wall</h1>
-      <div id="confessionCounter">Total Confessions: 0</div>
+  <div class="header">
+    <h1>🧠 Anonymous Confession Wall</h1>
+    <input type="text" id="nickname" placeholder="Your nickname..." />
+    <select id="category">
+      <option value="General">General</option>
+      <option value="Funny">Funny</option>
+      <option value="Sad">Sad</option>
+      <option value="Weird">Weird</option>
+    </select>
+    <textarea id="confessionInput" placeholder="Type your confession..."></textarea>
+    <div class="emoji-bar">
+      <span class="emoji">😂</span>
+      <span class="emoji">😭</span>
+      <span class="emoji">😳</span>
+      <span class="emoji">😡</span>
+      <span class="emoji">❤️</span>
     </div>
-
-    <div class="user-input">
-      <input type="text" id="nickname" placeholder="Enter your nickname (or stay Anonymous)">
-      <select id="category">
-        <option value="Funny">Funny</option>
-        <option value="Embarrassing">Embarrassing</option>
-        <option value="Deep Thoughts">Deep Thoughts</option>
-      </select>
-      <textarea id="confessionInput" rows="3" placeholder="What's on your mind?"></textarea>
-      <div class="emoji-picker">
-        <span class="emoji">😂</span>
-        <span class="emoji">😳</span>
-        <span class="emoji">😭</span>
-        <span class="emoji">😈</span>
-        <span class="emoji">🤔</span>
-      </div>
-      <button onclick="submitConfession()">Post Confession</button>
-      <button onclick="toggleDarkMode()">Toggle Dark Mode</button>
-    </div>
-
-    <div id="confessionsList"></div>
+    <button id="submitBtn">Post Confession</button>
+    <div id="confessionCounter"></div>
   </div>
 
-  <script src="script.js"></script>
+  <div id="confessionsList"></div>
+
+  <script type="module" src="script.js"></script>
 </body>
 </html>
