@@ -1,33 +1,39 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Anonymous Confession Wall</title>
-  <link rel="stylesheet" href="style.css">
-  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.4.0/dist/confetti.browser.min.js"></script>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <div class="container">
-    <h1>Anonymous Confession Wall</h1>
-    <p id="confessionCounter">Total Confessions: 0</p>
-    <textarea id="confessionInput" placeholder="Type your confession here..." rows="4" cols="50"></textarea>
-    <button onclick="postConfession()">Post Confession</button>
+    <div class="header">
+      <h1>Anonymous Confession Wall</h1>
+      <div id="confessionCounter">Total Confessions: 0</div>
+    </div>
 
-    <div class="emoji-picker">
-      <span class="emoji" onclick="addEmoji('😊')">😊</span>
-      <span class="emoji" onclick="addEmoji('😂')">😂</span>
-      <span class="emoji" onclick="addEmoji('😭')">😭</span>
-      <span class="emoji" onclick="addEmoji('😎')">😎</span>
+    <div class="user-input">
+      <input type="text" id="nickname" placeholder="Enter your nickname (or stay Anonymous)">
+      <select id="category">
+        <option value="Funny">Funny</option>
+        <option value="Embarrassing">Embarrassing</option>
+        <option value="Deep Thoughts">Deep Thoughts</option>
+      </select>
+      <textarea id="confessionInput" rows="3" placeholder="What's on your mind?"></textarea>
+      <div class="emoji-picker">
+        <span class="emoji">😂</span>
+        <span class="emoji">😳</span>
+        <span class="emoji">😭</span>
+        <span class="emoji">😈</span>
+        <span class="emoji">🤔</span>
+      </div>
+      <button onclick="submitConfession()">Post Confession</button>
+      <button onclick="toggleDarkMode()">Toggle Dark Mode</button>
     </div>
 
     <div id="confessionsList"></div>
   </div>
-
-  <audio id="backgroundMusic" autoplay loop>
-    <source src="background-music.mp3" type="audio/mp3">
-    Your browser does not support the audio element.
-  </audio>
 
   <script src="script.js"></script>
 </body>
