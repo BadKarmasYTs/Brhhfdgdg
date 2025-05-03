@@ -1,100 +1,82 @@
-import { initializeApp } from "firebase/app";
-import { getDatabase, ref, set, onValue } from "firebase/database";
+const confessionsKey = 'confessions';
 
-// Firebase setup
-const firebaseConfig = {
-  apiKey: "AIzaSyCuwF7_iRb0CIqApyk3_bBFPCoUHVTbn1Q",
-  authDomain: "website-e08f0.firebaseapp.com",
-  databaseURL: "https://website-e08f0-default-rtdb.firebaseio.com",
-  projectId: "website-e08f0",
-  storageBucket: "website-e08f0.firebasestorage.app",
-  messagingSenderId: "738977165779",
-  appId: "1:738977165779:web:8b54334e8306aa5932bf26",
-  measurementId: "G-5DC7NWVJGD"
-};
+function loadConfessions() {
+  const confessions = JSON.parse(localStorage.getItem(confessionsKey)) || [];
+  const confessionsList = document.getElementById('confessionsList');
+  confessionsList.innerHTML = ''; 
 
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
+  // Sort confessions by upvotes
+  confessions.sort((a, b) => b.upvotes - a.upvotes);
 
-const confessionsList = document.getElementById("confessionsList");
-const confessionInput = document.getElementById("confessionInput");
-const nicknameInput = document.getElementById("nickname");
-const categorySelect = document.getElementById("category");
-const submitBtn = document.getElementById("submitBtn");
+  confessions.forEach((confession, index) => {
+    const confessionDiv = document.createElement('div');
+    confessionDiv.classList.add('confession');
+    confessionDiv.innerHTML = `
+      <p><strong>Anonymous:</strong> ${confession.text}</p>
+      <div class="reaction-container">
+        <span class="upvote" onclick="vote(${index}, 'upvote')">👍 ${confession.upvotes}</span>
+        <span class="downvote" onclick="vote(${index}, 'downvote')">👎 ${confession.downvotes}</span>
+        <span class="heart" onclick="reactToConfession(${index}, 'heart')">❤️</span>
+        <span class="star" onclick="reactToConfession(${index}, 'star')">⭐</span>
+      </div>
+    `;
+    confessionsList.appendChild(confessionDiv);
+  });
 
-// Dark Mode Toggle
-const darkToggle = document.getElementById("darkModeToggle");
-const body = document.body;
-if (localStorage.getItem("darkMode") === "true") {
-  body.classList.add("dark");
+  document.getElementById('confessionCounter').innerText = `Total Confessions: ${confessions.length}`;
 }
 
-darkToggle.addEventListener("click", () => {
-  body.classList.toggle("dark");
-  localStorage.setItem("darkMode", body.classList.contains("dark"));
-});
-
-// Add confession to Firebase
-submitBtn.addEventListener("click", function () {
-  const nickname = nicknameInput.value.trim();
+function postConfession() {
+  const confessionInput = document.getElementById('confessionInput');
   const confessionText = confessionInput.value.trim();
-  const category = categorySelect.value;
 
-  // Simple logging to check if the function is triggered
-  console.log("Button clicked!");
-  console.log("Nickname:", nickname, "Confession:", confessionText, "Category:", category);
-
-  if (nickname && confessionText) {
-    const confessionRef = ref(db, 'confessions/' + Date.now());
-    set(confessionRef, {
-      nickname: nickname,
-      text: confessionText,
-      category: category,
-      timestamp: Date.now()
-    }).then(() => {
-      // Reset the form inputs after submission
-      confessionInput.value = "";
-      nicknameInput.value = "";
-    }).catch((error) => {
-      console.error("Error posting confession:", error);
-    });
-  } else {
-    alert("Please enter a nickname and confession!");
+  if (confessionText) {
+    const confessions = JSON.parse(localStorage.getItem(confessionsKey)) || [];
+    const newConfession = { text: confessionText, upvotes: 0, downvotes: 0, heartReacted: false, starReacted: false };
+    confessions.push(newConfession);
+    localStorage.setItem(confessionsKey, JSON.stringify(confessions));
+    confessionInput.value = '';
+    loadConfessions();
+    confetti();  // Trigger confetti animation
   }
-});
+}
 
-// Real-time confessions update
-onValue(ref(db, 'confessions'), (snapshot) => {
-  confessionsList.innerHTML = "";
-  snapshot.forEach((childSnapshot) => {
-    const confession = childSnapshot.val();
-    const confessionElement = document.createElement("div");
-    confessionElement.classList.add("confession");
-    confessionElement.dataset.category = confession.category;
+function vote(index, type) {
+  const confessions = JSON.parse(localStorage.getItem(confessionsKey)) || [];
+  
+  if (type === 'upvote') {
+    // Ensure users can't vote more than once
+    if (!confessions[index].votedUp) {
+      confessions[index].upvotes++;
+      confessions[index].votedUp = true;
+      confetti(); // Trigger confetti explosion on upvote
+    }
+  } else if (type === 'downvote') {
+    // Ensure users can't vote more than once
+    if (!confessions[index].votedDown) {
+      confessions[index].downvotes++;
+      confessions[index].votedDown = true;
+    }
+  }
+  
+  localStorage.setItem(confessionsKey, JSON.stringify(confessions));
+  loadConfessions();
+}
 
-    confessionElement.innerHTML = `
-      <h3>${confession.nickname}</h3>
-      <p>${confession.text}</p>
-      <p class="timestamp">${new Date(confession.timestamp).toLocaleString()}</p>
-    `;
-    confessionsList.appendChild(confessionElement);
-  });
-});
+function reactToConfession(index, reaction) {
+  const confessions = JSON.parse(localStorage.getItem(confessionsKey)) || [];
+  if (reaction === 'heart' && !confessions[index].heartReacted) {
+    confessions[index].heartReacted = true;
+  } else if (reaction === 'star' && !confessions[index].starReacted) {
+    confessions[index].starReacted = true;
+  }
+  localStorage.setItem(confessionsKey, JSON.stringify(confessions));
+  loadConfessions();
+}
 
-// Emoji input handling
-const emojis = document.querySelectorAll('.emoji');
-emojis.forEach(emoji => {
-  emoji.onclick = () => confessionInput.value += emoji.textContent;
-});
+function addEmoji(emoji) {
+  const confessionInput = document.getElementById('confessionInput');
+  confessionInput.value += emoji;
+}
 
-// Category filter
-const filterButtons = document.querySelectorAll('.filterBtn');
-filterButtons.forEach(btn => {
-  btn.addEventListener("click", () => {
-    const category = btn.dataset.filter;
-    const confs = document.querySelectorAll('.confession');
-    confs.forEach(c => {
-      c.style.display = (category === 'all' || c.dataset.category === category) ? 'block' : 'none';
-    });
-  });
-});
+loadConfessions();
