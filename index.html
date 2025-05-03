@@ -1,39 +1,49 @@
-Html, <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Anonymous Confession Wall</title>
+  <title>Social Wall</title>
   <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-  <div class="page">
-    <div class="header">
-      <div class="top-bar">
-        <h1>Confession Wall</h1>
-        <button id="darkModeToggle">🌓</button>
-      </div>
-      <input type="text" id="nickname" placeholder="Your nickname...">
-      <select id="category">
-        <option value="General">General</option>
-        <option value="Funny">Funny</option>
-        <option value="Sad">Sad</option>
-        <option value="Weird">Weird</option>
-      </select>
-      <textarea id="confessionInput" placeholder="Type your confession..."></textarea>
-      <div class="emoji-bar">
-        <span class="emoji">😂</span>
-        <span class="emoji">😭</span>
-        <span class="emoji">😳</span>
-        <span class="emoji">😡</span>
-        <span class="emoji">❤️</span>
-      </div>
-      <button id="submitBtn">Post Confession</button>
-      <div id="confessionCounter"></div>
+  <nav class="top-nav">
+    <div class="logo">Social Wall</div>
+    <div class="nav-right">
+      <button id="darkModeToggle">🌓</button>
+      <input type="text" id="nickname" placeholder="Username">
     </div>
+  </nav>
 
-    <div id="confessionsList"></div>
-  </div>
+  <main>
+    <section class="post-creator">
+      <textarea id="confessionInput" placeholder="What's on your mind?"></textarea>
+      <div class="post-actions">
+        <select id="category">
+          <option value="General">General</option>
+          <option value="Funny">Funny</option>
+          <option value="Sad">Sad</option>
+          <option value="Weird">Weird</option>
+        </select>
+        <div class="emoji-bar">
+          <span class="emoji">😂</span>
+          <span class="emoji">😭</span>
+          <span class="emoji">😳</span>
+          <span class="emoji">😡</span>
+          <span class="emoji">❤️</span>
+        </div>
+        <button id="submitBtn">Post</button>
+      </div>
+      <div id="confessionCounter"></div>
+    </section>
+
+    <section id="confessionsList" class="confessions-list"></section>
+  </main>
+
+  <div id="notification"></div>
 
   <script>
     const darkToggle = document.getElementById("darkModeToggle")
