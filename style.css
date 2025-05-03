@@ -137,6 +137,17 @@ textarea {
   gap: 15px;
 }
 
+.comments {
+  background: #f1f1f1;
+  padding: 10px;
+  border-radius: 8px;
+  margin-top: 10px;
+}
+
+.comment {
+  margin: 5px 0;
+}
+
 .footer {
   text-align: center;
   margin-top: 20px;
